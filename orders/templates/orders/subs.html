@@ -1,0 +1,78 @@
+{% extends "orders/base.html" %}
+
+{% block title %}Our Subs{% endblock %}
+
+{% block body %}
+  <h1>Our Subs</h1>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-10">
+        <table class="table">
+          <tr>
+            <th></th>
+            <th>Small</th>
+            <th>Large</th>
+          </tr>
+          {% for element in subs %}
+          <tr>
+            <td>{{ element.sub }}</td>
+            <td>{{ element.small }}&nbsp&nbsp{% if user.is_authenticated %}{% csrf_token %}<button data-dish="{{ element.sub }}" data-type="" data-size="Small" data-price="{{ element.small }}" type="button" class="btn btn-secondary btn-sm">Add Cart</button>{% endif %}</td>
+            <td>{{ element.large }}&nbsp&nbsp{% if user.is_authenticated %}{% csrf_token %}<button data-dish="{{ element.sub }}" data-type="" data-size="Large" data-price="{{ element.large }}" type="button" class="btn btn-secondary btn-sm">Add Cart</button>{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </table>
+        <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+        let buttons = document.querySelectorAll('.btn-secondary');
+        buttons.forEach(button => {
+          button.onclick = function() {
+
+            let crsf = this.previousSibling.value;
+
+            let request = new XMLHttpRequest;
+            let data = new FormData();
+            data.append("dish", this.dataset.dish);
+            data.append("type", this.dataset.type);
+            data.append("size", this.dataset.size);
+            data.append("price", this.dataset.price);
+
+            request.open('POST', '/added');
+            request.setRequestHeader('X-CSRFToken', crsf);
+            request.send(data);
+
+            request.onload = () => {
+              let data = JSON.parse(request.responseText);
+              console.log(data);
+            }
+
+          }
+        });
+      });
+        </script>
+        <h5>Some Extras</h5>
+        <table class="table">
+          <tr>
+            <th></th>
+            <th>Price</td>
+          <tr>
+            <td>Extra Cheese in All Subs</td>
+            <td>+0.50</td>
+          </tr>
+          <tr>
+            <td>Mushrooms <span style="font-size:0.8em; color: gray;"> - Just for Steaks - </span></td>
+            <td>+0.50</td>
+          </tr>
+          <tr>
+            <td>Green Peppers  <span style="font-size:0.8em; color: gray;"> - Just for Steaks - </span></td>
+            <td>+0.50</td>
+          </tr>
+          <tr>
+            <td>Onions  <span style="font-size:0.8em; color: gray;"> - Just for Steaks - </span></td>
+            <td>+0.50</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock %}

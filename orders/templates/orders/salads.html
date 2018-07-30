@@ -1,0 +1,26 @@
+{% extends "orders/base.html" %}
+{% load static %}
+{% block title %}Our Subs{% endblock %}
+
+{% block body %}
+  <h1>Tasty Salads</h1>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-10">
+        <table class="table">
+          <tr>
+            <th></th>
+            <th>Price</th>
+          </tr>
+          {% for element in salads %}
+          <tr>
+            <td>{{ element.salad }}</td>
+            <td>{{ element.price }}&nbsp&nbsp{% if user.is_authenticated %}{% csrf_token %}<button data-dish="{{ element.salad }}" data-type="" data-size="" data-price="{{ element.price }}" type="button" class="btn btn-secondary btn-sm">Add Cart</button>{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+  <script src="{% static 'orders/make_order.js' %}"></script>
+{% endblock %}
