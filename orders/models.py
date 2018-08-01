@@ -68,15 +68,54 @@ class DinnerPlatters(models.Model):
 
 class Orders(models.Model):
     dish = models.CharField(max_length=40)
-    pizza_type = models.CharField(max_length=40, null=True)
-    size = models.CharField(max_length=15, null=True)
-    pizza_toppings = models.ManyToManyField(Toppings, related_name="orders")
-    sub_additions = models.ManyToManyField(Additions, related_name="orders")
+    pizza_type = models.CharField(max_length=40, null=True, blank=True)
+    size = models.CharField(max_length=15, null=True, blank=True)
+    pizza_toppings = models.ManyToManyField(Toppings, related_name="orders", blank=True)
+    sub_additions = models.ManyToManyField(Additions, related_name="orders", blank=True)
     price = models.DecimalField(max_digits=8, decimal_places=2)
     username = models.CharField(max_length=30)
     time = models.DateTimeField(auto_now=True)
-    order_status = models.CharField(max_length=10)
+    order_status = models.CharField(max_length=10, default='Draft')
+
+    def to_tuple(self, query, object):
+        list = query
+        output = []
+        if object == 'topping':
+            for elem in list:
+                output.append(elem.topping)
+        else:
+            for elem in list:
+                output.append(elem.addition)
+        return tuple(output)
 
     def __str__(self):
-        return f"Order number: {self.id} Dish: {self.dish} Type Pizza: {self.pizza_type} Size Pizza: {self.size} Toppings: {self.pizza_toppings}\
-        Sub Additions: {self.sub_additions} Price: {self.price} Order To: {self.username} Order At: {self.time} Order Status: {self.order_status}"
+        return f"{self.id} | {self.dish} Type: {self.pizza_type} Size: {self.size} Toppings: {self.to_tuple(self.pizza_toppings.all(), 'topping')}\
+        Additions: {self.to_tuple(self.sub_additions.all(), 'addition')} Price: {self.price} For: {self.username} At: {self.time.hour}:{self.time.minute}-{self.time.day}/{self.time.month}/{self.time.year} Status: {self.order_status}"
+
+
+
+class Confirmations(models.Model):
+    dish = models.CharField(max_length=40)
+    pizza_type = models.CharField(max_length=40, null=True, blank=True)
+    size = models.CharField(max_length=15, null=True, blank=True)
+    pizza_toppings = models.ManyToManyField(Toppings, related_name="confirmations", blank=True)
+    sub_additions = models.ManyToManyField(Additions, related_name="confirmations", blank=True)
+    price = models.DecimalField(max_digits=8, decimal_places=2)
+    username = models.CharField(max_length=30)
+    time = models.DateTimeField(auto_now=True)
+    order_status = models.CharField(max_length=10, default='Draft')
+
+    def to_tuple(self, query, object):
+        list = query
+        output = []
+        if object == 'topping':
+            for elem in list:
+                output.append(elem.topping)
+        else:
+            for elem in list:
+                output.append(elem.addition)
+        return tuple(output)
+
+    def __str__(self):
+        return f"{self.id} | {self.dish} Type: {self.pizza_type} Size: {self.size} Toppings: {self.to_tuple(self.pizza_toppings.all(), 'topping')}\
+        Additions: {self.to_tuple(self.sub_additions.all(), 'addition')} Price: {self.price} For: {self.username} At: {self.time.hour}:{self.time.minute}-{self.time.day}/{self.time.month}/{self.time.year} Status: {self.order_status}"

@@ -1,3 +1,5 @@
+
+
 document.addEventListener("DOMContentLoaded", () => {
 
         let buttons = document.querySelectorAll('.btn-secondary');
@@ -19,6 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             request.onload = () => {
               let data = JSON.parse(request.responseText);
+              document.querySelector('#cart').src = "/static/orders/img/Shopping-Cart-icon-active.png";
               console.log(data);
             }
 

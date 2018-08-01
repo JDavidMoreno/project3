@@ -80,14 +80,13 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+          <h5 class="modal-title" id="exampleModalLabel">It's Time for Toppings!</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <p>Choose one of these toppings for your Pizza!
-
+          <p>Choose your favourites toppings for your Pizza</p>
             <div class="form-group col-4" id="selectors_box">
               <select class="selector" class="form-control">
                 {% for option in toppings %}
@@ -158,6 +157,8 @@
 
             request.onload = () => {
               let data = JSON.parse(request.responseText);
+              document.querySelector('#cart').src = "/static/orders/img/Shopping-Cart-icon-active.png";
+
               console.log(data);
             }
           }
@@ -177,6 +178,8 @@
 
           request.onload = () => {
             let data = JSON.parse(request.responseText);
+            document.querySelector('#cart').src = "/static/orders/img/Shopping-Cart-icon-active.png";
+
             console.log(data);
         }
       }

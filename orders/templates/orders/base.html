@@ -53,7 +53,7 @@
           {% endif %}
           {% if user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'cart' %}"><img src="{% static 'orders/img/Shopping-Cart-icon.png' %}" width="30px" height="30px" alt="cart"></a>
+            <a class="nav-link" href="{% url 'cart' %}"><img id="cart" src="{% if request.session.blue_cart is True %}{% static 'orders/img/Shopping-Cart-icon-active.png' %}{% else %}{% static 'orders/img/Shopping-Cart-icon.png' %}{% endif %}" width="30px" height="30px" alt="cart"></a>
           <li class="nav-item">
             <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
           </li>

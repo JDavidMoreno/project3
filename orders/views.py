@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 
 
-from orders.models import RegPizzaPrices, SiciPizzaPrices, Toppings, Subs, Pastas, Salads, DinnerPlatters, Orders
+from orders.models import RegPizzaPrices, SiciPizzaPrices, Toppings, Subs, Pastas, Salads, DinnerPlatters, Orders, Additions, Confirmations
 
 
 # Create your views here.
@@ -99,6 +99,37 @@ def added(request):
     price = request.POST["price"]
 
     try:
+        addition1 = request.POST["checkbox0"]
+        print(addition1)
+    except KeyError:
+        addition1 = None
+
+    try:
+        addition2 = request.POST["checkbox1"]
+        print(addition1)
+    except KeyError:
+        addition2 = None
+
+    try:
+        addition3 = request.POST["checkbox2"]
+        print(addition1)
+    except KeyError:
+        addition3 = None
+
+    try:
+        addition4 = request.POST["checkbox3"]
+        print(addition1)
+    except KeyError:
+        addition4 = None
+
+
+
+    try:
+        extra_cheese = request.POST["extra_cheese"]
+        print(extra_cheese)
+    except KeyError:
+        extra_cheese = None
+    try:
         topping1 = request.POST["toppings0"]
         print(topping1)
     except KeyError:
@@ -130,6 +161,12 @@ def added(request):
     if topping3: topping_to_add3 = Toppings.objects.get(id=topping3)
     if topping4: topping_to_add4 = Toppings.objects.get(id=topping4)
     if topping5: topping_to_add5 = Toppings.objects.get(id=topping5)
+    if extra_cheese: cheese_to_add = Additions.objects.filter(addition='Extra Cheese on any sub')
+    if addition1: addition_to_add1 = Additions.objects.filter(addition=addition1)
+    if addition2: addition_to_add2 = Additions.objects.filter(addition=addition2)
+    if addition3: addition_to_add3 = Additions.objects.filter(addition=addition3)
+    if addition4: addition_to_add4 = Additions.objects.filter(addition=addition4)
+
 
 
 
@@ -142,8 +179,16 @@ def added(request):
     if topping3: order.pizza_toppings.add(topping_to_add3)
     if topping4: order.pizza_toppings.add(topping_to_add4)
     if topping5: order.pizza_toppings.add(topping_to_add5)
+    if extra_cheese: order.sub_additions.add(cheese_to_add[0])
+    if addition1: order.sub_additions.add(addition_to_add1[0])
+    if addition2: order.sub_additions.add(addition_to_add2[0])
+    if addition3: order.sub_additions.add(addition_to_add3[0])
+    if addition4: order.sub_additions.add(addition_to_add4[0])
 
     order.save()
+
+    request.session["blue_cart"] = True
+    print(request.session["blue_cart"])
 
     return JsonResponse({"success": True})
 
@@ -156,8 +201,33 @@ def cart(request):
 def delete(request):
     id = request.POST["id"]
 
+    try:
+        no_content = request.POST["no_content"]
+    except KeyError:
+        no_content = None
+
     order = Orders.objects.get(id=id)
 
     order.delete()
 
+    if no_content == 'no_content':
+        request.session["blue_cart"] = False
+        print(request.session["blue_cart"])
+
     return JsonResponse({"success": True})
+
+def confirmation(request):
+
+    orders = Orders.objects.filter(username=request.user.username)
+
+    for order in orders:
+        confirmation = Confirmations(dish=order.dish, pizza_type=order.pizza_type, size=order.size, price=order.price,
+        username=order.username, order_status='Confirmed')
+        confirmation.save()
+        confirmation.pizza_toppings.set(order.pizza_toppings.all())
+        confirmation.sub_additions.set(order.sub_additions.all())
+        confirmation.save()
+        order.delete()
+
+    confirmations = Confirmations.objects.filter(username=request.user.username, order_status='Confirmed')
+    return render(request, "orders/confirmation.html" , {"confirmations": confirmations} )

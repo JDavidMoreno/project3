@@ -9,8 +9,7 @@
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-11">
-
-        <div class="container cart">
+        <div class="container cart" id="main_container">
           <div class="row header">
             <div class="col">Item</div>
             <div class="col">Type</div>
@@ -48,61 +47,88 @@
             <div class="col"></div>
             <div class="col" id="total"></div>
             <div class="col-1"></div>
+          </div>
         </div>
-        <script>
-
-          function makeSum() {
-            let total = 0;
-            let prices = Array.from(document.getElementsByClassName('price'));
-
-            prices.forEach(price => {
-              let sum = parseFloat(price.innerHTML);
-              total += sum;
-            });
-            document.querySelector('#total').innerHTML = total.toFixed(2);
-          };
-
-          document.addEventListener("DOMContentLoaded", () => {
-            makeSum()
-            let cancels = document.querySelectorAll('.cancel');
-
-            cancels.forEach(cancel => {
-              cancel.onmouseover = () => {
-                cancel.style.cursor = 'pointer';
-              }
-            })
-
-            // If hide button is clicked, delete the post.
-            document.addEventListener('click', event => {
-                const element = event.target;
-                if (element.className === 'cancel') {
-                  element.parentNode.parentNode.style.animationPlayState = 'running';
-                  let request = new XMLHttpRequest;
-                  let crsf = element.previousSibling.value;
-                  let data = new FormData();
-                  data.append('id', element.dataset.id);
-
-                  request.open('POST', '/delete');
-                  request.setRequestHeader('X-CSRFToken', crsf);
-                  request.send(data);
-
-                  request.onload = () => {
-                    let response = JSON.parse(request.responseText);
-                    console.log(response);
-                  }
-
-
-                  element.parentNode.parentNode.addEventListener('animationend', () =>  {
-
-                      element.parentNode.parentNode.remove();
-
-                      makeSum()
-                  });
-                }
-            });
-          });
-        </script>
       </div>
     </div>
   </div>
+  <div class="container">
+    <div class="row justify-content-end">
+      <div class="col-4" id="submit" style="visibility: hidden;">
+        {% csrf_token %}
+        <a href="{% url 'confirmation' %}" alt="Confirm Order"><button class="btn btn-primary" type="button" >Make Order</button></a>
+      </div>
+    </div>
+  </div>
+  <script>
+
+
+    function makeSum() {
+      let total = 0;
+      let prices = Array.from(document.getElementsByClassName('price'));
+
+      prices.forEach(price => {
+        let sum = parseFloat(price.innerHTML);
+        total += sum;
+      });
+      document.querySelector('#total').innerHTML = total.toFixed(2);
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+      if (document.querySelector('#main_container').childNodes.length > 7) {
+        document.querySelector('#submit').style.visibility = 'visible';
+      }
+
+      makeSum()
+      let cancels = document.querySelectorAll('.cancel');
+
+      cancels.forEach(cancel => {
+        cancel.onmouseover = () => {
+          cancel.style.cursor = 'pointer';
+        }
+      })
+
+      // If hide button is clicked, delete the post.
+      document.addEventListener('click', event => {
+          const element = event.target;
+          if (element.className === 'cancel') {
+            element.parentNode.parentNode.style.animationPlayState = 'running';
+            let request = new XMLHttpRequest;
+            let crsf = element.previousSibling.value;
+            let data = new FormData();
+            data.append('id', element.dataset.id);
+
+
+
+
+            element.parentNode.parentNode.addEventListener('animationend', () =>  {
+            element.parentNode.parentNode.remove();
+            makeSum()
+
+            //if (document.querySelector('#main_container').childNodes.length < 8) {
+            if (document.querySelector('.cart-row') == null ){
+              console.log('Its 11');
+              document.querySelector('#cart').src = "{% static 'orders/img/Shopping-Cart-icon.png' %}";
+              document.querySelector('#submit').style.visibility = 'hidden';
+              data.append('no_content', 'no_content');
+            }
+            
+            request.open('POST', '/delete');
+            request.setRequestHeader('X-CSRFToken', crsf);
+            request.send(data);
+
+            request.onload = () => {
+              let response = JSON.parse(request.responseText);
+
+
+              console.log(response);
+            }
+
+
+            });
+          }
+      });
+    });
+  </script>
 {% endblock %}
