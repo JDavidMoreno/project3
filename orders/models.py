@@ -29,13 +29,6 @@ class SiciPizzaPrices(models.Model):
     def __str__(self):
         return f"Sicilian {self.pizza} pizza - Small:{self.small} Large:{self.large}"
 
-class Subs(models.Model):
-    sub = models.CharField(max_length=30)
-    small = models.DecimalField(max_digits=5, decimal_places=2)
-    large = models.DecimalField(max_digits=5, decimal_places=2)
-
-    def __str__(self):
-        return f"Sub {self.sub} - Small:{self.small} Large:{self.large}"
 
 class Additions(models.Model):
     addition = models.CharField(max_length=30)
@@ -43,6 +36,16 @@ class Additions(models.Model):
 
     def __str__(self):
         return f"{self.addition}"
+
+class Subs(models.Model):
+    sub = models.CharField(max_length=30)
+    small = models.DecimalField(max_digits=5, decimal_places=2)
+    large = models.DecimalField(max_digits=5, decimal_places=2)
+    additions = models.ManyToManyField(Additions, related_name="subs", blank=True)
+
+    def __str__(self):
+        return f"Sub {self.sub} - Small:{self.small} Large:{self.large}"
+
 
 class Pastas(models.Model):
     pasta = models.CharField(max_length=30)

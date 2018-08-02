@@ -53,16 +53,30 @@
     </div>
   </div>
   <div class="container">
-    <div class="row justify-content-end">
-      <div class="col-4" id="submit" style="visibility: hidden;">
-        {% csrf_token %}
-        <a href="{% url 'confirmation' %}" alt="Confirm Order"><button class="btn btn-primary" type="button" >Make Order</button></a>
+    <div class="row justify-content-end" >
+      <div class="col-4"  style="visibility: hidden;" id="submit">
+
+        <form  action="{% url 'checkout' %}" method="POST">
+          {% csrf_token %}
+          <input id="amount" type="hidden" name="amount" value="">
+          <input  type="hidden" name="username" value="{{ user.username }}">
+          <script
+            id="stripe"
+            src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+            data-key="pk_test_TYooMQauvdEDq54NiTphI7jx"
+            data-amount=""
+            data-name="Pinochio's Pizza"
+            data-description=""
+            data-image="{% static 'orders/img/Pinocchios-icon-small.png' %}"
+            data-locale="auto"
+            data-zip-code="true">
+          </script>
+        </form>
       </div>
+
     </div>
   </div>
   <script>
-
-
     function makeSum() {
       let total = 0;
       let prices = Array.from(document.getElementsByClassName('price'));
@@ -72,13 +86,14 @@
         total += sum;
       });
       document.querySelector('#total').innerHTML = total.toFixed(2);
+
     };
 
     document.addEventListener("DOMContentLoaded", () => {
 
-      if (document.querySelector('#main_container').childNodes.length > 7) {
-        document.querySelector('#submit').style.visibility = 'visible';
-      }
+      /*if (document.querySelector('#main_container').childNodes.length < 8) {
+        document.querySelector('.stripe-button-el').setAttribute('style', 'visibility: hidden !important;');
+      }*/
 
       makeSum()
       let cancels = document.querySelectorAll('.cancel');
@@ -99,9 +114,6 @@
             let data = new FormData();
             data.append('id', element.dataset.id);
 
-
-
-
             element.parentNode.parentNode.addEventListener('animationend', () =>  {
             element.parentNode.parentNode.remove();
             makeSum()
@@ -110,10 +122,10 @@
             if (document.querySelector('.cart-row') == null ){
               console.log('Its 11');
               document.querySelector('#cart').src = "{% static 'orders/img/Shopping-Cart-icon.png' %}";
-              document.querySelector('#submit').style.visibility = 'hidden';
+              //document.querySelector('#submit').style.visibility = 'hidden';
               data.append('no_content', 'no_content');
             }
-            
+
             request.open('POST', '/delete');
             request.setRequestHeader('X-CSRFToken', crsf);
             request.send(data);
@@ -127,6 +139,14 @@
 
 
             });
+          }
+          if (element == document.querySelector('.stripe-button-el').firstChild) {
+            makeSum();
+            let stripe = document.querySelector('#stripe');
+            stripe.dataset.amount = document.querySelector('#total').innerHTML;
+            let pre = document.querySelector('#total').innerHTML;
+            document.querySelector('#amount').value = parseFloat(pre).toFixed(2) * 100;
+          
           }
       });
     });

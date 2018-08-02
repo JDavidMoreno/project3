@@ -3,6 +3,8 @@ from django.urls import reverse
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from datetime import datetime
+import stripe
 
 
 from orders.models import RegPizzaPrices, SiciPizzaPrices, Toppings, Subs, Pastas, Salads, DinnerPlatters, Orders, Additions, Confirmations
@@ -67,8 +69,10 @@ def pizzas(request):
 
 def subs(request):
     subs = Subs.objects.all()
+    additions = Additions.objects.all()
     context = {
-        "subs":subs
+        "subs":subs,
+        "additions":additions
     }
 
     return render(request, "orders/subs.html", context)
@@ -100,58 +104,46 @@ def added(request):
 
     try:
         addition1 = request.POST["checkbox0"]
-        print(addition1)
     except KeyError:
         addition1 = None
-
     try:
         addition2 = request.POST["checkbox1"]
-        print(addition1)
     except KeyError:
         addition2 = None
-
     try:
         addition3 = request.POST["checkbox2"]
-        print(addition1)
     except KeyError:
         addition3 = None
-
     try:
         addition4 = request.POST["checkbox3"]
-        print(addition1)
     except KeyError:
         addition4 = None
-
-
-
+    try:
+        addition5 = request.POST["checkbox4"]
+    except KeyError:
+        addition5 = None
     try:
         extra_cheese = request.POST["extra_cheese"]
-        print(extra_cheese)
     except KeyError:
         extra_cheese = None
     try:
         topping1 = request.POST["toppings0"]
-        print(topping1)
     except KeyError:
         topping1 = None
     try:
         topping2 = request.POST["toppings1"]
-        print(topping2)
     except KeyError:
         topping2 = None
     try:
         topping3 = request.POST["toppings2"]
-        print(topping3)
     except KeyError:
         topping3 = None
     try:
         topping4 = request.POST["toppings3"]
-        print(topping4)
     except KeyError:
         topping4 = None
     try:
         topping5 = request.POST["toppings4"]
-        print(topping5)
     except KeyError:
         topping5 = None
 
@@ -161,11 +153,12 @@ def added(request):
     if topping3: topping_to_add3 = Toppings.objects.get(id=topping3)
     if topping4: topping_to_add4 = Toppings.objects.get(id=topping4)
     if topping5: topping_to_add5 = Toppings.objects.get(id=topping5)
-    if extra_cheese: cheese_to_add = Additions.objects.filter(addition='Extra Cheese on any sub')
+    if extra_cheese: cheese_to_add = Additions.objects.filter(addition='Extra Cheese')
     if addition1: addition_to_add1 = Additions.objects.filter(addition=addition1)
     if addition2: addition_to_add2 = Additions.objects.filter(addition=addition2)
     if addition3: addition_to_add3 = Additions.objects.filter(addition=addition3)
     if addition4: addition_to_add4 = Additions.objects.filter(addition=addition4)
+    if addition5: addition_to_add5 = Additions.objects.filter(addition=addition5)
 
 
 
@@ -184,6 +177,7 @@ def added(request):
     if addition2: order.sub_additions.add(addition_to_add2[0])
     if addition3: order.sub_additions.add(addition_to_add3[0])
     if addition4: order.sub_additions.add(addition_to_add4[0])
+    if addition5: order.sub_additions.add(addition_to_add5[0])
 
     order.save()
 
@@ -216,18 +210,44 @@ def delete(request):
 
     return JsonResponse({"success": True})
 
-def confirmation(request):
 
-    orders = Orders.objects.filter(username=request.user.username)
+# Based on the http://zabana.me/notes/how-to-integrate-stripe-with-your-django-app.html tutorial about Stripe Chechouts
+def checkout(request):
 
-    for order in orders:
-        confirmation = Confirmations(dish=order.dish, pizza_type=order.pizza_type, size=order.size, price=order.price,
-        username=order.username, order_status='Confirmed')
-        confirmation.save()
-        confirmation.pizza_toppings.set(order.pizza_toppings.all())
-        confirmation.sub_additions.set(order.sub_additions.all())
-        confirmation.save()
-        order.delete()
 
-    confirmations = Confirmations.objects.filter(username=request.user.username, order_status='Confirmed')
-    return render(request, "orders/confirmation.html" , {"confirmations": confirmations} )
+    stripe.api_key = "sk_test_4eC39HqLyjWDarjtT1zdp7dc"
+
+    if request.method == 'POST':
+        token = request.POST['stripeToken']
+        amount = request.POST['amount']
+
+        username = request.POST['username']
+        date = datetime.now()
+
+
+
+    try:
+        charge = stripe.Charge.create(
+            amount      = amount,
+            currency    = "usd",
+            source      = token,
+            description = f"Customer: {username}, on {date.day}/{date.month}/{date.year} at {date.hour}:{date.minute}"
+        )
+    
+    except stripe.error.CardError as ce:
+        return False, ce
+
+    else:
+        orders = Orders.objects.filter(username=request.user.username)
+
+        for order in orders:
+            confirmation = Confirmations(dish=order.dish, pizza_type=order.pizza_type, size=order.size, price=order.price,
+            username=order.username, order_status='Confirmed')
+            confirmation.save()
+            confirmation.pizza_toppings.set(order.pizza_toppings.all())
+            confirmation.sub_additions.set(order.sub_additions.all())
+            confirmation.save()
+            order.delete()
+
+        confirmations = Confirmations.objects.filter(username=request.user.username, order_status='Confirmed')
+        return render(request, "orders/confirmation.html" , {"confirmations": confirmations} )
