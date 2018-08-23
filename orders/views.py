@@ -182,7 +182,6 @@ def added(request):
     order.save()
 
     request.session["blue_cart"] = True
-    print(request.session["blue_cart"])
 
     return JsonResponse({"success": True})
 
@@ -206,7 +205,6 @@ def delete(request):
 
     if no_content == 'no_content':
         request.session["blue_cart"] = False
-        print(request.session["blue_cart"])
 
     return JsonResponse({"success": True})
 
@@ -233,7 +231,7 @@ def checkout(request):
             source      = token,
             description = f"Customer: {username}, on {date.day}/{date.month}/{date.year} at {date.hour}:{date.minute}"
         )
-    
+
     except stripe.error.CardError as ce:
         return False, ce
 

@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
         buttons.forEach(button => {
           button.onclick = function() {
 
-            let crsf = this.previousSibling.value;
+            let srsf = this.previousSibling.value;
 
             let request = new XMLHttpRequest;
             let data = new FormData();
@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
             data.append("price", this.dataset.price);
 
             request.open('POST', '/added');
-            request.setRequestHeader('X-CSRFToken', crsf);
+            request.setRequestHeader('X-CSRFToken', csrf);
             request.send(data);
 
             request.onload = () => {
@@ -28,3 +28,19 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         });
       });
+
+      /*function (address, dataToSend, crsf){
+        let request = new XMLHttpRequest;
+        let data = new FormData();
+        for (let i = 0; i < data.length; i++) {
+          data.append(dataToSend.name, dataToSend.data)
+        }
+        request.open('POST', address);
+        request.setRequestHeader('X-CSRFToken', crsf);
+
+        request.onload = () => {
+          let data = JSON.parse(request.responseText);
+          return data;
+        }*/
+
+      }
