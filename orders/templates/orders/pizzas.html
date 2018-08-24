@@ -122,7 +122,6 @@
             selectors_box.appendChild(selector.cloneNode(true));
           }
 
-
           let csrf = button.previousSibling.value;
           let data = new FormData();
           data.append("dish", this.dataset.dish);
@@ -130,36 +129,27 @@
           data.append("size", this.dataset.size);
           data.append("price", this.dataset.price);
 
-
           document.querySelector('#addToCart').onclick = function() {
 
             let request = new XMLHttpRequest;
             let counter = 0;
             selectors_box.childNodes.forEach( option => {
 
-
               if (option.className == 'selector'){
-                console.log(counter);
                 data.append("toppings" + counter, option.value);
                 counter++;
               }
             });
 
-
-            //data.append("toppings", document.querySelector('#selector').value);
-            //console.log(document.querySelector('#selector').value);
             request.open('POST', '/added');
             request.setRequestHeader('X-CSRFToken', csrf);
 
             request.send(data);
-
             document.querySelector('.modal-footer').childNodes[1].click();
 
             request.onload = () => {
               let data = JSON.parse(request.responseText);
               document.querySelector('#cart').src = "/static/orders/img/Shopping-Cart-icon-active.png";
-
-              console.log(data);
             }
           }
         }else{
@@ -179,8 +169,6 @@
           request.onload = () => {
             let data = JSON.parse(request.responseText);
             document.querySelector('#cart').src = "/static/orders/img/Shopping-Cart-icon-active.png";
-
-            console.log(data);
         }
       }
     }

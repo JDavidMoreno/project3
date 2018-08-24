@@ -209,7 +209,7 @@ def delete(request):
     return JsonResponse({"success": True})
 
 
-# Based on the http://zabana.me/notes/how-to-integrate-stripe-with-your-django-app.html tutorial about Stripe Chechouts
+# Based on the http://zabana.me/notes/how-to-integrate-stripe-with-your-django-app.html tutorial about Stripe Checkouts
 def checkout(request):
 
 
