@@ -47,3 +47,7 @@ Something very similar to that happens in 'subs', but in this case to chose the 
 Then in 'cart' a table-like is generated with all orders stored for that single user. I chose to use divs and not a table because I thought it will be easier to make the CSS animation when deleting an item in the list. Actually in my computer Safari's version (which is a bit old) it doesn't work always fine, however in Google Chrome is always right.
 
 Finally, 'confirmation', as briefly described before is the page that appear after the payment is executed, and shows the orders already confirmed for that user.
+
+**Personal Touch**
+
+Here my personal touch has been the implementation of a payment method using Stripe. 
